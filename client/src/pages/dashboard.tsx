@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import SidebarNavigation from "@/components/sidebar-navigation";
 import UserToggle from "@/components/ui/user-toggle";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import StatCard from "@/components/ui/stat-card";
 import CashRegister from "@/components/client/cash-register";
 import Invoices from "@/components/client/invoices";
@@ -18,22 +19,22 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useMobile();
-  const [userRole, setUserRole] = useState<'client' | 'accountant'>(
-    user?.role as 'client' | 'accountant' || 'client'
+  const [userRole, setUserRole] = useState<"client" | "accountant">(
+    (user?.role as "client" | "accountant") || "client"
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-  
-  const isClient = userRole === 'client';
-  const isAccountant = userRole === 'accountant';
-  
+
+  const isClient = userRole === "client";
+  const isAccountant = userRole === "accountant";
+
   const toggleUserRole = () => {
-    // Only allow switching roles if user is actually an accountant
-    if (user?.role === 'accountant') {
-      setUserRole(userRole === 'client' ? 'accountant' : 'client');
+    if (user?.role === "accountant") {
+      setUserRole(userRole === "client" ? "accountant" : "client");
     } else {
       toast({
         title: "Accès refusé",
-        description: "Vous n'avez pas les droits pour accéder à l'interface comptable.",
+        description:
+          "Vous n'avez pas les droits pour accéder à l'interface comptable.",
         variant: "destructive",
       });
     }
@@ -44,30 +45,31 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* User Type Toggle for Accountants */}
-      {user?.role === 'accountant' && (
-        <div className="fixed top-4 right-4 z-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-background dark:text-foreground">
+      {/* Contrôles Utilisateur : rôle + thème */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        {user?.role === "accountant" && (
           <UserToggle
-            value={userRole === 'accountant'}
+            value={userRole === "accountant"}
             onChange={toggleUserRole}
           />
-        </div>
-      )}
+        )}
+        <ThemeToggle />
+      </div>
 
-      {/* Mobile Menu Toggle */}
+      {/* Bouton menu mobile */}
       <div className="fixed top-4 left-4 z-50 lg:hidden">
         <Button
           variant="outline"
           size="icon"
           onClick={toggleSidebar}
-          className="bg-white shadow-sm"
+          className="bg-white dark:bg-card shadow-sm"
         >
           <Menu className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Sidebar Navigation */}
+      {/* Navigation latérale */}
       <SidebarNavigation
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -75,16 +77,19 @@ export default function Dashboard() {
         user={user}
       />
 
-      {/* Main Content */}
-      <main className={`pt-16 ${isMobile ? 'px-4' : 'lg:pl-64 px-8'}`}>
+      {/* Contenu principal */}
+      <main className={`pt-16 ${isMobile ? "px-4" : "lg:pl-64 px-8"}`}>
         {isClient && (
           <div>
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-              <p className="text-gray-500">Bienvenue sur votre espace de gestion financière</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Tableau de bord
+              </h1>
+              <p className="text-gray-500 dark:text-gray-300">
+                Bienvenue sur votre espace de gestion financière
+              </p>
             </header>
 
-            {/* Client Dashboard Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard
                 title="Chiffre d'affaires"
@@ -117,7 +122,8 @@ export default function Dashboard() {
                   onClick: () => {
                     toast({
                       title: "Documents transmis",
-                      description: "Documents transmis au comptable avec succès!",
+                      description:
+                        "Documents transmis au comptable avec succès!",
                       variant: "success",
                     });
                   },
@@ -127,7 +133,6 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Tabs for Client Interface */}
             <Tabs defaultValue="cash-register" className="mb-8">
               <TabsList>
                 <TabsTrigger value="cash-register">Caisse</TabsTrigger>
@@ -150,11 +155,14 @@ export default function Dashboard() {
         {isAccountant && (
           <div>
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-gray-900">Espace comptable</h1>
-              <p className="text-gray-500">Gestion des clients et de leurs documents</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Espace comptable
+              </h1>
+              <p className="text-gray-500 dark:text-gray-300">
+                Gestion des clients et de leurs documents
+              </p>
             </header>
 
-            {/* Accountant Dashboard Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <StatCard
                 title="Clients actifs"
@@ -181,10 +189,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Client List */}
             <ClientsList />
-
-            {/* Recent Documents */}
             <DocumentsList />
           </div>
         )}
