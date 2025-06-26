@@ -1,11 +1,15 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
+import { createServer } from "http";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 
-const app = express();
+const app = express(); // ✅ maintenant d'abord `app`
+const server = createServer(app); // puis `server` qui dépend de `app`
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// (Middleware de log inchangé)
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -34,10 +38,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// au lieu de .listen, on prépare juste l’app avec ses routes
+// Lancement de Vite + routes
 registerRoutes(app).then(() => {
-  serveStatic(app);
+  setupVite(app, server);
 
+  server.listen(3000, () => {
+    console.log("🚀 Server running at http://localhost:3000");
+  });
 });
-
-export default app;
